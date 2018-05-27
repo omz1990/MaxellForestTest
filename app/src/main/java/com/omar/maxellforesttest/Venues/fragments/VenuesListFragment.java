@@ -7,6 +7,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +31,10 @@ import com.omar.maxellforesttest.Common.network.managers.SearchVenuesManager;
 import com.omar.maxellforesttest.Common.ui.BaseFragment;
 import com.omar.maxellforesttest.Common.utils.PermissionHelper;
 import com.omar.maxellforesttest.R;
+import com.omar.maxellforesttest.Venues.adapters.VenuesListAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,10 +43,13 @@ import io.reactivex.observers.DisposableObserver;
 /**
  * Created by omz on 27/5/18
  */
-public class VenuesListFragment extends BaseFragment {
+public class VenuesListFragment extends BaseFragment implements VenuesListAdapter.VenuesListListener {
 
     @BindView(R.id.progressBar) protected ProgressBar progressBar;
 
+    @BindView(R.id.venuesRecyclerView) protected RecyclerView venuesRecyclerView;
+    private VenuesListAdapter venuesAdapter;
+    private List<Venue> venuesList;
 
     private SearchVenuesManager searchVenuesManager;
     private SearchResponse responseData;
@@ -70,6 +80,13 @@ public class VenuesListFragment extends BaseFragment {
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume(); //required to make map display immediately
 
+        venuesList = new ArrayList<>();
+        venuesAdapter = new VenuesListAdapter(getActivity(), venuesList, this);
+        RecyclerView.LayoutManager mLayoutManagerPopular = new GridLayoutManager(getActivity(), 1);
+        venuesRecyclerView.setLayoutManager(mLayoutManagerPopular);
+        venuesRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        venuesRecyclerView.setAdapter(venuesAdapter);
+
         mMapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
@@ -86,7 +103,6 @@ public class VenuesListFragment extends BaseFragment {
 
 
                 // Disable buttons that are covered by custom frameLayout
-                mGoogleMap.getUiSettings().setMapToolbarEnabled(false);
                 mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
 
                 LatLng sydney = new LatLng(-34, 151);
@@ -146,7 +162,7 @@ public class VenuesListFragment extends BaseFragment {
 
         if (zoomToCurrentLocation) {
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
             this.getMap().animateCamera(cameraUpdate);
             zoomToCurrentLocation = false;
         }
@@ -201,5 +217,13 @@ public class VenuesListFragment extends BaseFragment {
             LatLng latLng = new LatLng(venue.getLocation().getLat(), venue.getLocation().getLng());
             this.getMap().addMarker(new MarkerOptions().position(latLng).title(venue.getName()));
         }
+        venuesList.clear();
+        venuesList.addAll(responseData.getResponse().getVenuesSortedByDistance());
+        venuesAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onVenueClick(Venue venue) {
+
     }
 }
