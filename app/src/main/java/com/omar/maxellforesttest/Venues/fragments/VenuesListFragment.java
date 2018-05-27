@@ -147,6 +147,7 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
     @Override
     public void onResume() {
         super.onResume();
+        zoomToCurrentLocation = true;
         try {
             if (locationPermissionHelper.hasPermission()) {
                 locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 15*1000, 0, locationChangeListener);
@@ -154,8 +155,6 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
         } catch (SecurityException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private void startLocationManager() {

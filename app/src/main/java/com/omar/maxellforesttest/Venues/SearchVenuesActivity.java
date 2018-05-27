@@ -70,6 +70,8 @@ public class SearchVenuesActivity extends BaseActivity implements VenuesListFrag
             bundle.putString("url", venue.getUrl());
             webViewFragment.setArguments(bundle);
             FragmentTransaction ft = fragmentManager.beginTransaction();
+            // Sliding top and bottom animation
+            ft.setCustomAnimations(R.anim.enter_from_top, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_top);
             ft.replace(R.id.fragmentContainer, webViewFragment, TAG_VENUES_WEB);
             ft.addToBackStack(null);
             ft.commitAllowingStateLoss();
