@@ -57,7 +57,6 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
 
     @BindView(R.id.mMapView) MapView mMapView;
     private GoogleMap mGoogleMap;
-    private PermissionHelper locationPermissionHelper;
 
     private LocationManager locationManager;
     private LocationListener locationChangeListener;
@@ -77,7 +76,8 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
         View view = inflater.inflate(R.layout.fragment_venues_list, container, false);
         ButterKnife.bind(this, view);
 
-        locationPermissionHelper = new PermissionHelper(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION, 1);
+        searchVenuesManager = new SearchVenuesManager();
+
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume(); //required to make map display immediately
 
@@ -94,14 +94,11 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
                 mGoogleMap = mMap;
 
                 try {
-                    if (locationPermissionHelper.hasPermission()) {
-                        //Request location updates:
-                        mGoogleMap.setMyLocationEnabled(true);
-                    }
+                    //Request location updates:
+                    mGoogleMap.setMyLocationEnabled(true);
                 } catch (SecurityException e) {
                     // Failed to check permissions - let it go, just dont set My Location Enabled
                 }
-
 
                 // Disable buttons that are covered by custom frameLayout
                 mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -114,15 +111,7 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
             }
         });
 
-        if (locationPermissionHelper.hasPermission()) {
-            startLocationManager();
-        } else {
-            locationPermissionHelper.requestPermission();
-        }
-
-
-        searchVenuesManager = new SearchVenuesManager();
-
+        startLocationManager();
         return view;
     }
 
@@ -149,9 +138,7 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
         super.onResume();
         zoomToCurrentLocation = true;
         try {
-            if (locationPermissionHelper.hasPermission()) {
-                locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 15*1000, 0, locationChangeListener);
-            }
+            locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 15*1000, 0, locationChangeListener);
         } catch (SecurityException e) {
             e.printStackTrace();
         }

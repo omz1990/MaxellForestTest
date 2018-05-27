@@ -6,6 +6,31 @@
     <FrameLayout
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></FrameLayout>
+        android:layout_height="match_parent">
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/errorTextContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/errorText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Location Permission Required"
+            android:textColor="#000"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            android:layout_centerInParent="true"/>
+
+        <Button
+            android:id="@+id/grantPermission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Grant Permission"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/errorText"
+            android:layout_marginTop="20dp"/>
+    </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

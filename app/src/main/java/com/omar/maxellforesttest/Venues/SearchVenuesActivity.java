@@ -1,21 +1,31 @@
 package com.omar.maxellforesttest.Venues;
 
+import android.Manifest;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.omar.maxellforesttest.Common.network.domain.models.Venue;
 import com.omar.maxellforesttest.Common.ui.BaseActivity;
 import com.omar.maxellforesttest.Common.ui.WebViewFragment;
+import com.omar.maxellforesttest.Common.utils.PermissionHelper;
 import com.omar.maxellforesttest.R;
 import com.omar.maxellforesttest.Venues.fragments.VenuesListFragment;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by omz on 27/5/18
  */
 
 public class SearchVenuesActivity extends BaseActivity implements VenuesListFragment.VenuesFragmentListener {
+
+    @BindView(R.id.errorTextContainer) protected RelativeLayout errorTextContainer;
 
     FragmentManager fragmentManager;
 
@@ -26,13 +36,30 @@ public class SearchVenuesActivity extends BaseActivity implements VenuesListFrag
     private WebViewFragment webViewFragment;
     private String TAG_VENUES_WEB = "vWeb";
 
+    private PermissionHelper locationPermissionHelper;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ButterKnife.bind(this);
 
         fragmentManager = this.getSupportFragmentManager();
+        locationPermissionHelper = new PermissionHelper(this, Manifest.permission.ACCESS_FINE_LOCATION, 1);
+        if (!locationPermissionHelper.hasPermission()) {
+            locationPermissionHelper.requestPermission();
+        }
+    }
 
-        loadFragment();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (locationPermissionHelper.hasPermission()) {
+            errorTextContainer.setVisibility(View.GONE);
+            loadFragment();
+        } else {
+            errorTextContainer.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -60,6 +87,15 @@ public class SearchVenuesActivity extends BaseActivity implements VenuesListFrag
         fragmentTransaction.commitAllowingStateLoss();
     }
 
+    @OnClick(R.id.grantPermission)
+    protected void requestPermissionClicked() {
+        if (locationPermissionHelper.shouldShowRequestPermissionRationale()) {
+            locationPermissionHelper.requestPermission();
+        } else {
+            locationPermissionHelper.launchPermissionSettings();
+        }
+    }
+
     @Override
     public void onVenueClick(Venue venue) {
         if (webViewFragment == null) {
@@ -79,5 +115,10 @@ public class SearchVenuesActivity extends BaseActivity implements VenuesListFrag
             Toast.makeText(this, "This venue does not have a website", Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        onResume();
     }
 }
