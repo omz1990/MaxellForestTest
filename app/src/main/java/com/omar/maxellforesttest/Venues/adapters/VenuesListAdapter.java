@@ -45,26 +45,17 @@ public class VenuesListAdapter extends RecyclerView.Adapter<VenuesListAdapter.Ve
         holder.venueHeading.setText(venuesList.get(position).getName().trim());
         float distanceInKm = (float)venuesList.get(position).getLocation().getDistance()/1000;
         holder.venueDistance.setText(distanceInKm+" km");
-        String addressText = venuesList.get(position).getLocation().getAddress();
-        if (venuesList.get(position).getLocation().getCrossStreet() != null && !venuesList.get(position).getLocation().getCrossStreet().isEmpty()) {
-            addressText = addressText + " (" + venuesList.get(position).getLocation().getCrossStreet() + ")";
+
+        holder.venueAddress.setText(getAddressString(position));
+
+        try {
+            // Load images from received URLs
+            Glide.with(mContext)
+                    .load(venuesList.get(position).getCategories().get(0).getIcon().getPrefix() + "88" + venuesList.get(position).getCategories().get(0).getIcon().getSuffix())
+                    .into(holder.thumbnail);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        addressText = addressText
-                + "\n"
-                + venuesList.get(position).getLocation().getCity()
-                + ", "
-                + venuesList.get(position).getLocation().getState()
-                + ", "
-                + venuesList.get(position).getLocation().getPostalCode()
-                + ",\n"
-                + venuesList.get(position).getLocation().getCountry();
-
-        holder.venueAddress.setText(addressText);
-
-        // Load images from received URLs
-        Glide.with(mContext)
-                .load(venuesList.get(position).getCategories().get(0).getIcon().getPrefix()+"88"+venuesList.get(position).getCategories().get(0).getIcon().getSuffix())
-                .into(holder.thumbnail);
 
         // Listeners to notify the Fragment that an item has been clicked, and then send the details to the fragment
         holder.cardView.setOnClickListener(new View.OnClickListener() {
@@ -101,6 +92,40 @@ public class VenuesListAdapter extends RecyclerView.Adapter<VenuesListAdapter.Ve
             venueDistance = (TextView) view.findViewById(R.id.venueDistance);
             venueAddress = (TextView) view.findViewById(R.id.venueAddress);
         }
+    }
+
+    private String getAddressString(int position) {
+        String addressLine1 = "";
+        if (venuesList.get(position).getLocation().getAddress() != null && !venuesList.get(position).getLocation().getAddress().isEmpty()) {
+            addressLine1 = addressLine1 + venuesList.get(position).getLocation().getAddress();
+        }
+        if (venuesList.get(position).getLocation().getCrossStreet() != null && !venuesList.get(position).getLocation().getCrossStreet().isEmpty()) {
+            addressLine1 = addressLine1 + " (" + venuesList.get(position).getLocation().getCrossStreet() + ")";
+        }
+        if (addressLine1.length() > 0) {
+            addressLine1 = addressLine1 + ",\n";
+        }
+
+        String addressLine2 = "";
+        if (venuesList.get(position).getLocation().getCity() != null && !venuesList.get(position).getLocation().getCity().isEmpty()) {
+            addressLine2 = addressLine2 + venuesList.get(position).getLocation().getCity() + ", ";
+        }
+        if (venuesList.get(position).getLocation().getState() != null && !venuesList.get(position).getLocation().getState().isEmpty()) {
+            addressLine2 = addressLine2 + venuesList.get(position).getLocation().getState() + ", ";
+        }
+        if (venuesList.get(position).getLocation().getPostalCode() != null && !venuesList.get(position).getLocation().getPostalCode().isEmpty()) {
+            addressLine2 = addressLine2 + venuesList.get(position).getLocation().getPostalCode() + ",";
+        }
+        if (addressLine2.length() > 0) {
+            addressLine2 = addressLine2 + "\n";
+        }
+
+        String addressLine3 = "";
+        if (venuesList.get(position).getLocation().getCountry() != null && !venuesList.get(position).getLocation().getCountry().isEmpty()) {
+            addressLine3 = addressLine3 + venuesList.get(position).getLocation().getCountry();
+        }
+
+        return addressLine1 + addressLine2 + addressLine3;
     }
 
     public interface VenuesListListener {

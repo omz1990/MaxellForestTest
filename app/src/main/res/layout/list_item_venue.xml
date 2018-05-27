@@ -33,7 +33,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Venue Heading"
-                android:layout_marginBottom="3dp"
                 android:layout_marginRight="4dp"
                 android:layout_toLeftOf="@+id/venueDistance"
                 android:layout_toRightOf="@+id/thumbnail"
@@ -64,9 +63,8 @@
                 android:layout_below="@+id/venueHeading"
                 android:layout_toLeftOf="@+id/venueDistance"
                 android:layout_toRightOf="@+id/thumbnail"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="8dp"
                 android:textColor="#000"
-                android:padding="3dp"
                 android:textSize="15dp"/>
 
         </RelativeLayout>

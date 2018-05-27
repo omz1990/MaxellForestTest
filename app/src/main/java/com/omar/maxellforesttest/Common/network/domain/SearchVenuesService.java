@@ -17,6 +17,6 @@ public interface SearchVenuesService {
             +"client_id="+ ServerSettings.Domain.BASE_URL_CLIENT_ID
             +"&client_secret="+ServerSettings.Domain.BASE_URL_CLIENT_SECRET
             +"&v="+ServerSettings.Domain.BASE_URL_API_VERSION)
-    Observable<SearchResponse> searchVenues(@Query("ll") String ll, @Query("query") String query, @Query("limit") int limit);
+    Observable<SearchResponse> searchVenues(@Query("ll") String ll, @Query("query") String query, @Query("radius") int radius);
 
 }

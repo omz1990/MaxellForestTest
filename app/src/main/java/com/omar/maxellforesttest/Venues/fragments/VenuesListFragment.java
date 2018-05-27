@@ -53,6 +53,7 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
 
     private SearchVenuesManager searchVenuesManager;
     private SearchResponse responseData;
+    private VenuesFragmentListener listener;
 
     @BindView(R.id.mMapView) MapView mMapView;
     private GoogleMap mGoogleMap;
@@ -126,11 +127,29 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // Initialize the listener
+        if (context instanceof VenuesListFragment.VenuesFragmentListener) {
+            listener = (VenuesListFragment.VenuesFragmentListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement VenuesFragmentListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         try {
             if (locationPermissionHelper.hasPermission()) {
-                locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 10*1000, 0, locationChangeListener);
+                locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 15*1000, 0, locationChangeListener);
             }
         } catch (SecurityException e) {
             e.printStackTrace();
@@ -162,11 +181,11 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
 
         if (zoomToCurrentLocation) {
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12);
             this.getMap().animateCamera(cameraUpdate);
             zoomToCurrentLocation = false;
         }
-        searchVenues(location.getLatitude()+","+location.getLongitude(), "coffee", 10);
+        searchVenues(location.getLatitude()+","+location.getLongitude(), "coffee", 10000);
     }
 
     protected GoogleMap getMap() {
@@ -182,9 +201,9 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
         }
     }
 
-    public void searchVenues(String ll, String query, int limit) {
+    public void searchVenues(String ll, String query, int radius) {
         // Make the API call (Retrofit and RxJava)
-        searchVenuesManager.searchVenues(ll, query, limit)
+        searchVenuesManager.searchVenues(ll, query, radius)
                 .subscribe(getSearchVenuesSubscriber());
 
         progressBar.setVisibility(View.VISIBLE);
@@ -211,12 +230,14 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
         };
     }
 
-    private void updateScreenData() {
+    private synchronized void updateScreenData() {
+        // Update the markers on the map
         for (Venue venue : responseData.getResponse().getVenuesSortedByDistance()) {
-            Log.d("Result", "Venue Distance: "+venue.getLocation().getDistance());
             LatLng latLng = new LatLng(venue.getLocation().getLat(), venue.getLocation().getLng());
             this.getMap().addMarker(new MarkerOptions().position(latLng).title(venue.getName()));
         }
+
+        // Update the data in the recycler view
         venuesList.clear();
         venuesList.addAll(responseData.getResponse().getVenuesSortedByDistance());
         venuesAdapter.notifyDataSetChanged();
@@ -224,6 +245,11 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
 
     @Override
     public void onVenueClick(Venue venue) {
+        listener.onVenueClick(venue);
+    }
 
+    // Listener that will notify the activity that an item was clicked in the RecyclerView
+    public interface VenuesFragmentListener {
+        void onVenueClick(Venue venue);
     }
 }

@@ -20,8 +20,8 @@ public class SearchVenuesManager {
         searchVenuesService = ServiceFactory.createService(SearchVenuesService.class, ServerSettings.Domain.BASE_URL);
     }
 
-    public Observable<SearchResponse> searchVenues(String ll, String query, int limit) {
-        return searchVenuesService.searchVenues(ll, query, limit)
+    public Observable<SearchResponse> searchVenues(String ll, String query, int radius) {
+        return searchVenuesService.searchVenues(ll, query, radius)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
