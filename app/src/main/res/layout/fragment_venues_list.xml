@@ -23,7 +23,7 @@
             android:id="@+id/heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Coffee Spots in 10km: "
+            android:text="Coffee Spots in 5 km: "
             android:textColor="#000"
             android:textSize="20dp"
             android:layout_marginTop="5dp"

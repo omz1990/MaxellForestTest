@@ -138,7 +138,7 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
         super.onResume();
         zoomToCurrentLocation = true;
         try {
-            locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 15*1000, 0, locationChangeListener);
+            locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 20*1000, 0, locationChangeListener);
         } catch (SecurityException e) {
             e.printStackTrace();
         }
@@ -171,7 +171,7 @@ public class VenuesListFragment extends BaseFragment implements VenuesListAdapte
             this.getMap().animateCamera(cameraUpdate);
             zoomToCurrentLocation = false;
         }
-        searchVenues(location.getLatitude()+","+location.getLongitude(), "coffee", 10000);
+        searchVenues(location.getLatitude()+","+location.getLongitude(), "coffee", 5000);
     }
 
     protected GoogleMap getMap() {
