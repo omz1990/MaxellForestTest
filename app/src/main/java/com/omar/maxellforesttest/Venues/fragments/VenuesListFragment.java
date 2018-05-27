@@ -20,7 +20,10 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.omar.maxellforesttest.Common.network.domain.models.Response;
 import com.omar.maxellforesttest.Common.network.domain.models.SearchResponse;
+import com.omar.maxellforesttest.Common.network.domain.models.Venue;
 import com.omar.maxellforesttest.Common.network.managers.SearchVenuesManager;
 import com.omar.maxellforesttest.Common.ui.BaseFragment;
 import com.omar.maxellforesttest.Common.utils.PermissionHelper;
@@ -47,6 +50,8 @@ public class VenuesListFragment extends BaseFragment {
 
     private LocationManager locationManager;
     private LocationListener locationChangeListener;
+
+    private boolean zoomToCurrentLocation = true;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -109,7 +114,7 @@ public class VenuesListFragment extends BaseFragment {
         super.onResume();
         try {
             if (locationPermissionHelper.hasPermission()) {
-                locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 5*1000, 0, locationChangeListener);
+                locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 10*1000, 0, locationChangeListener);
             }
         } catch (SecurityException e) {
             e.printStackTrace();
@@ -139,10 +144,12 @@ public class VenuesListFragment extends BaseFragment {
 
     private void handleLocationChange(Location location) {
 
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12);
-        this.getMap().animateCamera(cameraUpdate);
-
+        if (zoomToCurrentLocation) {
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12);
+            this.getMap().animateCamera(cameraUpdate);
+            zoomToCurrentLocation = false;
+        }
         searchVenues(location.getLatitude()+","+location.getLongitude(), "coffee", 10);
     }
 
@@ -183,8 +190,16 @@ public class VenuesListFragment extends BaseFragment {
             public void onNext(SearchResponse response) {
                 progressBar.setVisibility(View.GONE);
                 responseData = response;
-                Log.d("Search", "Venuse Response Size: "+response.getResponse().getVenues().size());
+                updateScreenData();
             }
         };
+    }
+
+    private void updateScreenData() {
+        for (Venue venue : responseData.getResponse().getVenuesSortedByDistance()) {
+            Log.d("Result", "Venue Distance: "+venue.getLocation().getDistance());
+            LatLng latLng = new LatLng(venue.getLocation().getLat(), venue.getLocation().getLng());
+            this.getMap().addMarker(new MarkerOptions().position(latLng).title(venue.getName()));
+        }
     }
 }
